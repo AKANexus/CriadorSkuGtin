@@ -1,0 +1,100 @@
+﻿@{
+	ViewBag.Title = "title";
+	Layout = "_Layout";
+}
+@{
+	<div style="margin-top: 25px" class="container" id="códigoGtinDiv">
+		<div class="row">
+			<div class="col-sm"><h4>Informe o código de barras: </h4></div>
+			<div class="col-sm"><input id="gtinField" /></div>
+			<div class="col-sm"><a class="btn btn-primary" id="generateGtinButton">Gerar Novo...</a></div>
+		</div>
+	</div>
+
+	<div style="margin-top: 25px" class="container" id="volumesDiv" hidden>
+		<div class="row">
+			<div class="col-sm"><h4>Informe a quantidade de entrada: </h4></div>
+			<div class="col-sm"><input type="number" id="volumesField" value="0" /></div>
+		</div>
+	</div>
+
+	<div id="buttonDiv" hidden>
+		<p><a class="btn btn-primary" id="printButton">Imprimir</a></p>
+	</div>
+
+	@section Scripts {
+		<script type="text/javascript">
+			let gtinField = $("#gtinField");
+
+			gtinField.on("input",
+				function () {
+					if ((gtinField.val() ?? "").length === 13) {
+						$("#volumesDiv").removeAttr('hidden', false);
+					} else {
+						$("#volumesDiv").attr('hidden', true);
+					}
+				}
+			);
+
+			$("#volumesField").on("change",
+				function () {
+					if ($("#volumesField").val() > 0)
+						$("#buttonDiv").removeAttr('hidden', false);
+				});
+			$("#volumesField").on("blur",
+				function () {
+					if ($("#volumesField").val() > 0)
+						$("#buttonDiv").removeAttr('hidden', false);
+				});
+			$("#volumesField").on("input",
+				function () {
+					if ($("#volumesField").val() > 0)
+						$("#buttonDiv").removeAttr('hidden', false);
+				});
+
+			$("#printButton").on("click",
+				function () {
+					printLables();
+				});
+
+			$("#generateGtinButton").on("click",
+				function () {
+
+				});
+
+			async function printLables() {
+				var volumes = $("#volumesField").val();
+				var gtin = gtinField.val();
+				var printWindow = window.open(`/Printing/PrintableLabel?gtin=${gtin}&maxVolumes=${volumes}`);
+				window.location.replace('/');
+			}
+
+
+			$("#generateGtinButton").on('click',
+				async function () {
+					if ((gtinField.val() ?? "").length === 13) {
+
+					} else {
+						const myHeaders = new Headers();
+						myHeaders.append("Content-Type", "application/json");
+
+						const requestOpts = {
+							method: "GET",
+							headers: myHeaders
+						}
+
+						const get = await fetch('/Dados/GetNewGtin', requestOpts);
+						const response = get.text();
+						const receivedData = await response;
+						if (get.status >= 400) {
+							alert("Deu ruim");
+						} else {
+							gtinField.val(receivedData);
+							$("#volumesDiv").removeAttr('hidden', false);
+						}
+					}
+				});
+		</script>
+
+	}
+}

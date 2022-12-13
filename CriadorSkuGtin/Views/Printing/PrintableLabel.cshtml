@@ -1,0 +1,44 @@
+﻿@using Microsoft.AspNetCore.Html
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+	<html>
+	<head>
+	</head>
+	<body>
+
+		@for (int i = 0; i < (int)ViewData["volumes"]!; i++)
+		{
+			@(new HtmlString((string)ViewData["svg"]!))
+		}
+	</body>
+	<script type="text/javascript">
+		window.onload = function () {
+
+			var svgs = document.querySelectorAll("svg");
+
+			for (x = 0; x < svgs.length; x++) {
+				svgs[x].setAttribute('viewBox', '0 0 104 60');
+				let fefunca = svgs[x].lastElementChild;
+				fefunca.setAttribute('y', '85%');
+				fefunca.insertAdjacentHTML('afterend', `<text x="26.5%" y="99%" style="font-family: Arial; font-size: 8px; font-weight: bold" text-anchor="middle">Data: @DateTime.Today.ToString("dd/MM/yy")</text><text x="77.5%" y="99%" style="font-family: Arial; font-size: 8px; font-weight: bold" text-anchor="middle">Vol: ${x + 1}/${svgs.length}</text>`);
+				if (x > 0) {
+					svgs[x].style.marginTop = "0.5rem";
+				}
+			}
+
+
+			var rects = document.querySelectorAll("rect"), i;
+
+			for (i = 0; i < rects.length; ++i) {
+				rects[i].setAttribute('height', 43);
+			}
+			this.focus();
+			this.print(); //For Firefox browsers
+			document.execCommand('print'); //For chromium browsers
+			this.close();
+		}
+	</script>
+	</html>
+}

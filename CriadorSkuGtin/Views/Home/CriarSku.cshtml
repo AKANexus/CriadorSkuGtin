@@ -1,0 +1,210 @@
+﻿@model CriarSkuModel
+
+@{
+	ViewBag.Title = "title";
+	Layout = "_Layout";
+}
+
+<head>
+	<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap" rel="stylesheet">
+</head>
+
+<h2 style="font-family: 'Roboto Mono', monospace;" id="skuDisplay">SKU: ____________ </h2>
+<input hidden id="fabricanteSigla" value="___" />
+<input hidden id="grupoSigla" value="___" />
+
+<div style="margin-top: 25px">
+	<h4>Digite o Gtin do produto</h4>
+	<input style="width: 33%" id="gtinInput" required></input>
+</div>
+
+<div style="margin-top: 25px" hidden id="fabricanteDiv">
+	<h4>Selecione o fabricante</h4>
+	<select style="flex: 1; text-overflow: ellipsis; width: 33%" id="fabricanteSelect" required></select>
+</div>
+
+<div style="margin-top: 25px" hidden id="grupoDiv">
+	<h4>Selecione o grupo</h4>
+	<select style="flex: 1; text-overflow: ellipsis; width: 33%" id="grupoSelect" required></select>
+</div>
+
+<div style="margin-top: 25px" class="container" id="infoDiv" hidden>
+	<div class="row">
+		<div class="col-sm"><h4>Digite duas letras para a cor: </h4></div>
+		<div class="col-sm"><input id="corField" maxlength="2" /></div>
+	</div> <div class="row">
+		<div class="col-sm"><h4>Digite duas letras para o tamanho: </h4></div>
+		<div class="col-sm"><input id="tamanhoField" maxlength="2" /></div>
+	</div>	<div class="row">
+		<div class="col-sm"><h4>Digite duas letras para o modelo: </h4></div>
+		<div class="col-sm"><input id="modeloField" maxlength="2" /></div>
+	</div>
+</div>
+
+<div style="margin-top: 25px" class="container" id="saveDiv" hidden>
+	<button class="btn btn-primary" onclick="saveNewSku()">Salvar</button>
+</div>
+
+@*<div style="margin-top: 25px" class="container" id="volumesDiv" hidden>
+	<div class="row">
+		<div class="col-sm"><h4>Informe a quantidade de entrada: </h4></div>
+		<div class="col-sm"><input type="number" id="volumesField" value="0" /></div>
+	</div>
+</div>
+
+<div id="buttonDiv" hidden>
+	<p><a class="btn btn-light" id="printButton">Imprimir</a></p>
+</div>*@
+
+@section Scripts
+	{
+	<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+	<script type="text/javascript">
+		$(document).ready(function () {
+			myHeaders.append("Content-Type", "application/json");
+
+			$("#fabricanteSelect").select2({
+				ajax: {
+					url: "/Dados/GetFornecedoresContendo",
+					dataType: "json",
+					delay: 250,
+					data: function (params) {
+						return {
+							q: params.term
+						};
+					}
+				},
+				minimumInputLength: 2
+			});
+
+			$("#grupoSelect").select2({
+				ajax: {
+					url: "/Dados/GetGruposContendo",
+					dataType: "json",
+					delay: 250,
+					data: function (params) {
+						return {
+							q: params.term
+						};
+					}
+				},
+				minimumInputLength: 2
+			});
+		});
+
+		function updateSkuDisplay() {
+			var fab = $("#fabricanteSigla").val();
+			var grp = $("#grupoSigla").val();
+
+			var cor = $("#corField").val() ? $("#corField").val().toUpperCase().padEnd(2, '-') : "__";
+			var tam = $("#tamanhoField").val() ? $("#tamanhoField").val().toUpperCase().padEnd(2, '-') : "__";
+			var mod = $("#modeloField").val() ? $("#modeloField").val().toUpperCase().padEnd(2, '-') : "__";
+
+			$("#skuDisplay").text(`SKU: ${fab}${grp}${cor}${tam}${mod}`);
+		}
+
+		$("#fabricanteSelect").on("change",
+			function () {
+				var fab = $("#fabricanteSelect").select2("data")[0];
+
+				$("#fabricanteSigla").val(fab.id);
+				updateSkuDisplay();
+				$("#grupoDiv").removeAttr('hidden', false);
+			});
+
+		$("#grupoSelect").on("change",
+			function () {
+				var grp = $("#grupoSelect").select2("data")[0];
+
+				$("#grupoSigla").val(grp.id);
+				updateSkuDisplay();
+
+				$("#infoDiv").removeAttr('hidden', false);
+
+			});
+
+		$("#corField").on("input",
+			function () {
+				updateSkuDisplay();
+			});
+
+		$("#tamanhoField").on("input",
+			function () {
+				updateSkuDisplay();
+			});
+
+		$("#modeloField").on("input",
+			function () {
+				updateSkuDisplay();
+				document.getElementById("saveDiv").removeAttribute("hidden");
+			});
+
+		$("#gtinInput").blur(function (event) {
+			if (event.target.value.length === 8 || event.target.value.length === 13)
+			checkGtin(event);
+		});
+		$("#gtinInput").keyup(
+			function (event) {
+				if (event.key === "Enter" && (event.target.value.length === 8 || event.target.value.length === 13)) {
+					checkGtin(event);
+				}
+			});
+
+		const myHeaders = new Headers();
+		myHeaders.append("Content-Type", "application/json");
+
+		async function checkGtin(x) {
+			document.getElementById("fabricanteDiv").setAttribute("hidden", "true");
+			document.getElementById("grupoDiv").setAttribute("hidden", "true");
+			document.getElementById("infoDiv").setAttribute("hidden", "true");
+			//alert(x.target.value);
+			$("#skuDisplay").text("SKU: ____________ ");
+			const requestOptions = {
+				method: "GET",
+				headers: myHeaders
+			};
+
+			const get = await fetch(`/Dados/GetExistingSkuByGtin?gtin=${x.target.value}`, requestOptions);
+			if (get.status === 404) {
+				fabricanteDiv.removeAttribute("hidden");
+				return;
+			}
+
+			else if (get.status === 200) {
+				let response = get.text();
+				let data = JSON.parse(await response);
+				$("#skuDisplay").text(`SKU: ${data.sku}`);
+				return;
+			}
+		}
+
+		async function saveNewSku() {
+
+
+			const myBody = {};
+			myBody.discard = `00000000-0000-0000-0000-000000000000`;
+			myBody.gtin = document.getElementById("gtinInput").value;
+			myBody.sku = document.getElementById("skuDisplay").innerText.substring(5);
+
+			const requestOptions = {
+				method: "POST",
+				headers: myHeaders,
+				body: JSON.stringify(myBody)
+			};
+
+
+			const post = await fetch(`/Dados/PostNewSku`, requestOptions);
+			if (post.status >= 400) {
+				alert("falha ao gravar sku");
+				return;
+			}
+			alert("Gravado com sucesso!");
+			window.location.replace('/');
+		}
+		
+	</script>
+}
+

@@ -1,0 +1,56 @@
+﻿@{
+	ViewData["Title"] = "Home Page";
+	Layout = "_Layout";
+}
+<h3>Grupos</h3>
+<h5><a href="#" onclick="onGravarNovoButtonClick()">Cadastrar novo</a></h5>
+<div style="margin-top: 1rem">
+	<table id="ticketsDataTable" class="table table-bordered table-hover table-responsive" width="100%">
+		<thead>
+		<tr id="tableHeaders">
+			<th><a href=# id="orderTicke" data-column="Grupo" style="text-decoration: none"><span hidden>&#11015;</span><span>Grupo</span></a></th>
+			<th><a href=# id="orderObjet" data-column="Abreviatura" style="text-decoration: none"><span hidden>&#11015;</span><span>Abreviatura</span></a></th>
+			@*<th></th>*@
+		</tr>
+		</thead>
+		<tbody id="tableBod">
+		</tbody>
+	</table>
+	<nav class="d-flex flex-row-reverse justify-content-between">
+		<ul class="pagination" id="paginationButtons">
+		</ul>
+		<span id="recordNumbering"></span>
+	</nav>
+</div>
+
+<div class="modal fade" id="gravarNovoModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title" id="staticBackdropLabel">Cadastrar novo grupo</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body col">
+				<div class="col" style="height: 120px">
+					<div class="form-group d-flex flex-column">
+						<label for="descricaoField">Descrição</label>
+						<input id="descricaoField" />
+					</div>
+					<div class="form-group d-flex flex-column">
+						<label for="abreviaturaField">Abreviatura</label>
+						<input id="abreviaturaField" maxlength="3" />
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-primary" onclick="gravarGrupo()">Gravar</button>
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+@section Scripts
+{
+	<script src="~/js/loadGrupos.js"></script>
+}
